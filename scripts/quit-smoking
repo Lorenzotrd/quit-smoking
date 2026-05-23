@@ -934,7 +934,9 @@ function Hero({ days, cigsPerDay, costPerPack, cigsPerPack }) {
 
 function KeyStats({ days, cigsPerDay, costPerPack, cigsPerPack, cravingsDefeated, lifetimeSmoked, showSparklines }) {
   const cigsAvoided=days*cigsPerDay, money=(cigsAvoided/cigsPerPack)*costPerPack;
-  const aC=useCountUp(cigsAvoided), aM=useCountUp(money), aCr=useCountUp(cravingsDefeated);
+  const lifetimeSpent=(lifetimeSmoked/cigsPerPack)*costPerPack;
+  const lifetimePacks=Math.round(lifetimeSmoked/cigsPerPack);
+  const aC=useCountUp(cigsAvoided), aM=useCountUp(money), aLS=useCountUp(lifetimeSpent);
   return (
     <section className="stats">
       <div className="card stat green">
@@ -950,15 +952,15 @@ function KeyStats({ days, cigsPerDay, costPerPack, cigsPerPack, cravingsDefeated
         {showSparklines&&<Sparkline color="var(--gold)" seed={2}/>}
       </div>
       <div className="card stat teal">
-        <span className="label">Cravings defeated</span>
-        <div className="v tabnum">{fmt(Math.floor(aCr))}</div>
-        <div className="delta" style={{color:'var(--teal-soft)'}}><span>↑</span> Each one rewires the loop</div>
+        <span className="label">Lifetime spent on smoking</span>
+        <div className="v tabnum"><span className="pre">$</span>{fmt(Math.floor(aLS))}</div>
+        <div className="delta" style={{color:'var(--teal-soft)'}}><span>↑</span> {fmt(lifetimePacks)} packs · ${fmt(costPerPack,2)}/pack</div>
         {showSparklines&&<Sparkline color="var(--teal)" seed={3}/>}
       </div>
       <div className="card stat context">
         <span className="label">Lifetime context</span>
         <div className="v tabnum">{fmt(lifetimeSmoked)}<span className="post">cigs · est.</span></div>
-        <div className="delta">A history, not a verdict — your body is already undoing it.</div>
+        <div className="delta">≈ {fmt(lifetimePacks)} packs · ${fmt(costPerPack,2)} each — a history, not a verdict.</div>
       </div>
     </section>
   );
