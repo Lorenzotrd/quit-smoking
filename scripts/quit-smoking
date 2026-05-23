@@ -459,7 +459,7 @@ body {
 .stat .v .pre { font-size: 28px; color: var(--fg-mute); margin-right: 2px; vertical-align: 18px; font-family: var(--f-sans); font-weight: 300; }
 .stat .v .post { font-size: 13px; font-family: var(--f-mono); color: var(--fg-dim); margin-left: 8px; letter-spacing: 0.04em; text-transform: uppercase; vertical-align: 20px; }
 .stat .delta { margin-top: 12px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--green-soft); display: inline-flex; align-items: center; gap: 6px; }
-.stat .spark { position: absolute; inset: auto 14px 36px auto; width: 88px; height: 36px; opacity: 0.9; }
+.stat .spark { position: absolute; inset: auto 14px 52px auto; width: 88px; height: 36px; opacity: 0.9; }
 .stat.green .v { color: var(--green); }
 .stat.gold .v { color: var(--gold); }
 .stat.teal .v { color: var(--teal); }
