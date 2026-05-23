@@ -459,7 +459,7 @@ body {
 .stat .v .pre { font-size: 28px; color: var(--fg-mute); margin-right: 2px; vertical-align: 18px; font-family: var(--f-sans); font-weight: 300; }
 .stat .v .post { font-size: 13px; font-family: var(--f-mono); color: var(--fg-dim); margin-left: 8px; letter-spacing: 0.04em; text-transform: uppercase; vertical-align: 20px; }
 .stat .delta { margin-top: 12px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--green-soft); display: inline-flex; align-items: center; gap: 6px; }
-.stat .spark { position: absolute; inset: auto 14px 14px auto; width: 88px; height: 36px; opacity: 0.9; }
+.stat .spark { position: absolute; inset: auto 14px 36px auto; width: 88px; height: 36px; opacity: 0.9; }
 .stat.green .v { color: var(--green); }
 .stat.gold .v { color: var(--gold); }
 .stat.teal .v { color: var(--teal); }
@@ -468,7 +468,7 @@ body {
 .stat.context .delta { color: var(--fg-ghost); }
 .stat.context .label { color: var(--fg-ghost); }
 .lung-row { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; }
-.lung-card { padding: 0; min-height: 520px; overflow: hidden; position: relative; background: radial-gradient(60% 70% at 50% 40%, oklch(0.78 0.17 150 / 0.07), transparent 70%), linear-gradient(180deg, oklch(1 0 0 / 0.025), oklch(1 0 0 / 0) 40%), var(--bg-1); }
+.lung-card { padding: 0; min-height: 380px; overflow: hidden; position: relative; background: radial-gradient(60% 70% at 50% 40%, oklch(0.78 0.17 150 / 0.07), transparent 70%), linear-gradient(180deg, oklch(1 0 0 / 0.025), oklch(1 0 0 / 0) 40%), var(--bg-1); }
 .lung-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .lung-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 28px 30px; pointer-events: none; z-index: 2; }
 .lung-overlay .top { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -732,7 +732,7 @@ function LungViz({ recovery = 0.4 }) {
     const w = mount.clientWidth, h = mount.clientHeight;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-    camera.position.set(0, 0, 7);
+    camera.position.set(0, 0, 9.5);
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -771,7 +771,7 @@ function LungViz({ recovery = 0.4 }) {
     const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 1.2, 32), tm); tr.position.y = 1.6; lg.add(tr);
     const bL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.13, 0.7, 24), tm); bL.position.set(-0.45, 1.1, 0); bL.rotation.z = Math.PI / 4; lg.add(bL);
     const bR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.13, 0.7, 24), tm); bR.position.set(0.45, 1.1, 0); bR.rotation.z = -Math.PI / 4; lg.add(bR);
-    lg.scale.setScalar(1.18); lg.position.y = -0.2; scene.add(lg);
+    lg.scale.setScalar(0.95); lg.position.y = -0.15; scene.add(lg);
     let raf; const t0 = performance.now();
     const animate = () => {
       const t = (performance.now() - t0) * 0.001;
