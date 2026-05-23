@@ -26,7 +26,7 @@ Start with:
 
 ## Rule
 
-Before helping with any project, ask only 2-3 quick questions:
+Always ask in English. Before helping with any project, ask only 2-3 quick questions:
 
 - Did you smoke today?
 - Craving level right now, 0-10?
