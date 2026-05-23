@@ -294,6 +294,7 @@ def onboarding(state):
     print(QUIT_ASCII)
     print("\nFirst setup. Tell the system what it is fighting.\n")
     profile = {
+        "name": ask("Your first name?", ""),
         "current_age": ask("Current age?", "30"),
         "age_started": ask("Age when you started smoking?", "18"),
         "cigarettes_per_day": ask("Average cigarettes per day?", "10"),
@@ -867,7 +868,7 @@ function nextMilestoneLabel(m) {
 function Topbar({ today }) {
   return (
     <div className="topbar">
-      <div className="brand"><span className="brand-dot" /><span>Exhale &nbsp;·&nbsp; Quit Dashboard</span></div>
+      <div className="brand"><span className="brand-dot" /><span>{window.__INIT_STATE__?.userName || 'Exhale'} &nbsp;·&nbsp; Quit Dashboard</span></div>
       <div className="topbar-meta"><span>{today}</span><span className="live">Live · syncing</span></div>
     </div>
   );
@@ -1319,6 +1320,7 @@ def dashboard_html(state):
         "cravingNow": craving,
         "reframeIndex": reframe_index,
         "showSparklines": True,
+        "userName": profile.get("name", ""),
     }
     init_script = (
         f"<script>window.__INIT_STATE__={json.dumps(init_state)};"
