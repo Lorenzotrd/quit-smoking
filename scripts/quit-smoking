@@ -464,7 +464,7 @@ body {
 .stat.gold .v { color: var(--gold); }
 .stat.teal .v { color: var(--teal); }
 .stat.context { background: transparent; border-style: dashed; border-color: var(--line-soft); box-shadow: none; }
-.stat.context .v { font-size: 30px; color: var(--fg-dim); font-family: var(--f-sans); font-weight: 300; }
+.stat.context .v { font-size: 30px; color: var(--fg); font-family: var(--f-serif); font-weight: 400; }
 .stat.context .delta { color: var(--fg-ghost); }
 .stat.context .label { color: var(--fg-ghost); }
 .lung-row { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; }
