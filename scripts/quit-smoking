@@ -367,61 +367,905 @@ def lung_model_data_uri():
     return f"data:model/gltf-binary;base64,{encoded}"
 
 
+_DASHBOARD_TEMPLATE = r"""<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <title>Exhale · Quit Smoking Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg-0: oklch(0.15 0.012 165);
+  --bg-1: oklch(0.18 0.014 165);
+  --bg-2: oklch(0.215 0.015 165);
+  --bg-3: oklch(0.255 0.016 165);
+  --bg-elev: oklch(0.235 0.016 165);
+  --line: oklch(0.32 0.012 165 / 0.55);
+  --line-strong: oklch(0.42 0.014 165 / 0.7);
+  --line-soft: oklch(0.3 0.01 165 / 0.35);
+  --fg: oklch(0.97 0.005 160);
+  --fg-mute: oklch(0.78 0.01 160);
+  --fg-dim: oklch(0.6 0.012 160);
+  --fg-ghost: oklch(0.46 0.012 160);
+  --green: oklch(0.82 0.17 150);
+  --green-soft: oklch(0.72 0.13 150);
+  --green-dim: oklch(0.55 0.1 150);
+  --green-glow: oklch(0.82 0.17 150 / 0.35);
+  --gold: oklch(0.86 0.13 88);
+  --gold-soft: oklch(0.75 0.1 88);
+  --teal: oklch(0.83 0.13 200);
+  --teal-soft: oklch(0.72 0.1 200);
+  --warn: oklch(0.7 0.12 35);
+  --r-sm: 8px; --r: 14px; --r-lg: 20px; --r-xl: 28px;
+  --shadow-1: 0 1px 0 0 oklch(1 0 0 / 0.04) inset, 0 1px 2px oklch(0 0 0 / 0.35), 0 8px 24px -8px oklch(0 0 0 / 0.5);
+  --shadow-2: 0 1px 0 0 oklch(1 0 0 / 0.05) inset, 0 2px 4px oklch(0 0 0 / 0.4), 0 20px 50px -12px oklch(0 0 0 / 0.55);
+  --f-serif: "Instrument Serif", "Times New Roman", serif;
+  --f-sans: "Instrument Sans", -apple-system, "Helvetica Neue", sans-serif;
+  --f-mono: "JetBrains Mono", "SF Mono", "Menlo", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  font-family: var(--f-sans);
+  color: var(--fg);
+  background:
+    radial-gradient(1200px 700px at 8% -10%, oklch(0.28 0.05 150 / 0.32), transparent 60%),
+    radial-gradient(900px 600px at 95% 20%, oklch(0.27 0.04 200 / 0.22), transparent 60%),
+    radial-gradient(1100px 800px at 50% 110%, oklch(0.27 0.05 150 / 0.22), transparent 60%),
+    var(--bg-0);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+}
+.app { max-width: 1280px; margin: 0 auto; padding: 40px 32px 80px; display: flex; flex-direction: column; gap: 28px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 6px; }
+.brand { display: flex; align-items: center; gap: 12px; font-family: var(--f-sans); font-weight: 500; letter-spacing: 0.02em; font-size: 13px; color: var(--fg-mute); text-transform: uppercase; }
+.brand-dot { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(140deg, var(--green), oklch(0.6 0.18 165)); box-shadow: 0 0 0 1px oklch(1 0 0 / 0.08) inset, 0 0 18px var(--green-glow); position: relative; }
+.brand-dot::after { content: ""; position: absolute; inset: 5px; border-radius: 3px; background: oklch(0 0 0 / 0.55); }
+.topbar-meta { display: flex; gap: 18px; align-items: center; font-family: var(--f-mono); font-size: 11.5px; color: var(--fg-dim); letter-spacing: 0.04em; text-transform: uppercase; }
+.topbar-meta .live { display: inline-flex; align-items: center; gap: 8px; color: var(--green-soft); }
+.topbar-meta .live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px oklch(0.82 0.17 150 / 0.14), 0 0 12px var(--green); animation: pulse-dot 2.4s ease-in-out infinite; }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.card { background: linear-gradient(180deg, oklch(1 0 0 / 0.025), oklch(1 0 0 / 0) 40%), var(--bg-1); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); padding: 26px; position: relative; overflow: hidden; }
+.card.elev { background: linear-gradient(180deg, oklch(1 0 0 / 0.04), oklch(1 0 0 / 0) 40%), var(--bg-elev); box-shadow: var(--shadow-2); }
+.eyebrow { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-dim); display: inline-flex; align-items: center; gap: 8px; }
+.eyebrow .tick { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+.section-title { font-family: var(--f-serif); font-weight: 400; font-size: 22px; letter-spacing: -0.01em; margin: 8px 0 0; }
+.hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; padding: 0; overflow: hidden; }
+.hero-left { padding: 40px 42px 38px; border-right: 1px solid var(--line); position: relative; }
+.hero-right { padding: 40px 36px 38px; display: flex; flex-direction: column; background: linear-gradient(180deg, oklch(0.78 0.17 150 / 0.05), transparent 70%); }
+.hero-eyebrow { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.streak-num { font-family: var(--f-serif); font-weight: 400; font-size: clamp(140px, 18vw, 220px); line-height: 0.88; letter-spacing: -0.04em; color: var(--fg); display: flex; align-items: baseline; gap: 18px; }
+.streak-num .unit { font-family: var(--f-sans); font-weight: 400; font-size: 22px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-dim); transform: translateY(-26px); }
+.streak-sub { margin-top: 10px; font-family: var(--f-sans); font-size: 15px; color: var(--fg-mute); max-width: 36ch; line-height: 1.5; }
+.hero-right h3 { font-family: var(--f-serif); font-weight: 400; font-size: 26px; margin: 0; letter-spacing: -0.01em; }
+.hero-right .next { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-soft); margin-bottom: 14px; }
+.milestone-bar { margin-top: 22px; position: relative; height: 8px; background: oklch(0.3 0.01 160 / 0.6); border-radius: 999px; overflow: hidden; }
+.milestone-bar-fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--green-dim), var(--green)); border-radius: 999px; box-shadow: 0 0 16px var(--green-glow); transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+.milestone-ticks { display: flex; justify-content: space-between; margin-top: 14px; font-family: var(--f-mono); font-size: 11px; color: var(--fg-ghost); letter-spacing: 0.06em; }
+.milestone-ticks .active { color: var(--green); }
+.milestone-ticks .done { color: var(--fg-mute); }
+.badges { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
+.badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 8px; border-radius: 999px; background: oklch(0.78 0.17 150 / 0.08); border: 1px solid oklch(0.78 0.17 150 / 0.2); font-family: var(--f-mono); font-size: 11px; color: var(--green-soft); letter-spacing: 0.06em; }
+.badge .b-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+.badge.dim { background: transparent; border-color: var(--line); color: var(--fg-ghost); }
+.badge.dim .b-dot { background: var(--fg-ghost); box-shadow: none; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat { padding: 22px 22px 20px; display: flex; flex-direction: column; min-height: 168px; position: relative; isolation: isolate; }
+.stat .label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg-dim); }
+.stat .v { margin-top: auto; font-family: var(--f-serif); font-size: 60px; font-weight: 400; line-height: 1; letter-spacing: -0.025em; }
+.stat .v .pre { font-size: 28px; color: var(--fg-mute); margin-right: 2px; vertical-align: 18px; font-family: var(--f-sans); font-weight: 300; }
+.stat .v .post { font-size: 13px; font-family: var(--f-mono); color: var(--fg-dim); margin-left: 8px; letter-spacing: 0.04em; text-transform: uppercase; vertical-align: 20px; }
+.stat .delta { margin-top: 12px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--green-soft); display: inline-flex; align-items: center; gap: 6px; }
+.stat .spark { position: absolute; inset: auto 14px 14px auto; width: 88px; height: 36px; opacity: 0.9; }
+.stat.green .v { color: var(--green); }
+.stat.gold .v { color: var(--gold); }
+.stat.teal .v { color: var(--teal); }
+.stat.context { background: transparent; border-style: dashed; border-color: var(--line-soft); box-shadow: none; }
+.stat.context .v { font-size: 30px; color: var(--fg-dim); font-family: var(--f-sans); font-weight: 300; }
+.stat.context .delta { color: var(--fg-ghost); }
+.stat.context .label { color: var(--fg-ghost); }
+.lung-row { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; }
+.lung-card { padding: 0; min-height: 520px; overflow: hidden; position: relative; background: radial-gradient(60% 70% at 50% 40%, oklch(0.78 0.17 150 / 0.07), transparent 70%), linear-gradient(180deg, oklch(1 0 0 / 0.025), oklch(1 0 0 / 0) 40%), var(--bg-1); }
+.lung-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lung-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 28px 30px; pointer-events: none; z-index: 2; }
+.lung-overlay .top { display: flex; justify-content: space-between; align-items: flex-start; }
+.lung-overlay .bottom { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.recovery-pill { display: inline-flex; flex-direction: column; gap: 4px; padding: 12px 16px; border-radius: 14px; background: oklch(0.18 0.014 165 / 0.7); backdrop-filter: blur(6px); border: 1px solid var(--line); }
+.recovery-pill .label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green-soft); }
+.recovery-pill .v { font-family: var(--f-serif); font-size: 36px; line-height: 1; color: var(--fg); }
+.recovery-pill .v .pct { font-family: var(--f-sans); font-size: 14px; color: var(--fg-mute); margin-left: 4px; vertical-align: 14px; }
+.attribution { font-family: var(--f-mono); font-size: 10px; color: var(--fg-ghost); letter-spacing: 0.04em; max-width: 60%; line-height: 1.5; }
+.recovery-track { width: 200px; }
+.recovery-track .rt-label { display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-dim); margin-bottom: 6px; }
+.recovery-track .rt-bar { height: 4px; border-radius: 999px; background: oklch(0.3 0.01 160 / 0.7); overflow: hidden; }
+.recovery-track .rt-fill { height: 100%; background: linear-gradient(90deg, var(--green-dim), var(--green)); box-shadow: 0 0 12px var(--green-glow); transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+.row-3 { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 16px; }
+.activity-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px; }
+.day { border-radius: 12px; padding: 12px 10px; border: 1px solid var(--line); background: var(--bg-2); display: flex; flex-direction: column; gap: 10px; min-height: 110px; }
+.day .d-name { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--fg-dim); text-transform: uppercase; }
+.day .d-num { font-family: var(--f-serif); font-size: 26px; color: var(--fg); line-height: 1; }
+.day .d-mark { margin-top: auto; width: 100%; height: 4px; border-radius: 999px; background: oklch(0.3 0.01 160); }
+.day.clean { border-color: oklch(0.78 0.17 150 / 0.35); background: oklch(0.78 0.17 150 / 0.07); }
+.day.clean .d-mark { background: linear-gradient(90deg, var(--green-dim), var(--green)); box-shadow: 0 0 10px var(--green-glow); }
+.day.clean .d-num { color: var(--green); }
+.day.craving { border-color: oklch(0.86 0.13 88 / 0.3); background: oklch(0.86 0.13 88 / 0.05); }
+.day.craving .d-mark { background: var(--gold-soft); }
+.day.craving .d-num { color: var(--gold); }
+.day.smoke .d-mark { background: var(--warn); }
+.day.smoke .d-num { color: var(--warn); }
+.day.today { outline: 2px solid var(--green); outline-offset: 2px; }
+.day .d-tag { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); }
+.day.clean .d-tag { color: var(--green-soft); }
+.day.craving .d-tag { color: var(--gold-soft); }
+.activity-delight { display: flex; align-items: baseline; gap: 14px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.activity-delight .ad-num { font-family: var(--f-serif); font-size: 44px; color: var(--green); line-height: 1; }
+.activity-delight .ad-text { color: var(--fg-mute); font-size: 14px; max-width: 30ch; line-height: 1.4; }
+.craving-num { display: flex; align-items: baseline; gap: 12px; margin-top: 22px; }
+.craving-num .v { font-family: var(--f-serif); font-size: 110px; line-height: 0.85; color: var(--green); letter-spacing: -0.04em; }
+.craving-num .ten { color: var(--fg-ghost); font-family: var(--f-serif); font-size: 30px; }
+.craving-meter { margin-top: 22px; position: relative; height: 10px; border-radius: 999px; background: oklch(0.3 0.01 160 / 0.6); overflow: hidden; }
+.craving-meter .cm-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, var(--green), var(--gold) 60%, var(--warn)); transition: width 1s ease; }
+.craving-meter .cm-mask { position: absolute; right: 0; top: 0; bottom: 0; background: oklch(0.18 0.014 165 / 0.85); border-radius: 999px; transition: width 1s ease; }
+.craving-status { margin-top: 14px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+.craving-reassure { margin-top: 16px; font-family: var(--f-serif); font-size: 18px; line-height: 1.4; color: var(--fg-mute); font-style: italic; }
+.trigger-list { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.trigger { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 14px; }
+.trigger .rank { font-family: var(--f-mono); font-size: 11px; color: var(--fg-ghost); letter-spacing: 0.06em; }
+.trigger .name { font-size: 14px; color: var(--fg-mute); }
+.trigger .count { font-family: var(--f-mono); font-size: 11px; color: var(--fg-dim); }
+.trigger .bar { grid-column: 2 / 4; height: 3px; border-radius: 999px; background: oklch(0.3 0.01 160 / 0.5); position: relative; overflow: hidden; }
+.trigger .bar > i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--green-dim), var(--green)); border-radius: 999px; display: block; }
+.trigger.top .name { color: var(--fg); }
+.trigger.top .bar > i { background: linear-gradient(90deg, var(--green), var(--teal)); box-shadow: 0 0 10px var(--green-glow); }
+.reframe { padding: 78px 56px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px; background: radial-gradient(40% 80% at 50% 50%, oklch(0.78 0.17 150 / 0.06), transparent 70%), var(--bg-1); overflow: hidden; position: relative; }
+.reframe::before, .reframe::after { content: ""; position: absolute; width: 80%; max-width: 720px; height: 1px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, transparent, var(--line-strong), transparent); }
+.reframe::before { top: 0; }
+.reframe::after { bottom: 0; }
+.reframe-eyebrow { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--green-soft); }
+.reframe-q { font-family: var(--f-serif); font-style: italic; font-weight: 400; font-size: clamp(32px, 4.2vw, 54px); line-height: 1.18; letter-spacing: -0.015em; color: var(--fg); max-width: 22ch; text-wrap: balance; }
+.reframe-q .accent { color: var(--green); font-style: italic; }
+.reframe-attr { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fg-ghost); }
+.journey-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.stage-list { margin-top: 20px; display: flex; flex-direction: column; position: relative; }
+.stage-list::before { content: ""; position: absolute; left: 13px; top: 12px; bottom: 12px; width: 1px; background: var(--line); }
+.stage { display: grid; grid-template-columns: 28px 1fr; gap: 16px; padding: 14px 0; position: relative; border-bottom: 1px solid var(--line-soft); }
+.stage:last-child { border-bottom: none; }
+.stage .marker { width: 26px; height: 26px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: var(--f-mono); font-size: 11px; color: var(--fg-dim); position: relative; z-index: 1; }
+.stage.done .marker { background: var(--green); color: var(--bg-0); border-color: var(--green); box-shadow: 0 0 0 4px oklch(0.78 0.17 150 / 0.12), 0 0 16px var(--green-glow); }
+.stage.current .marker { background: var(--bg-1); border-color: var(--green); color: var(--green); box-shadow: 0 0 0 4px oklch(0.78 0.17 150 / 0.14), 0 0 16px var(--green-glow); }
+.stage .title { font-family: var(--f-serif); font-size: 22px; letter-spacing: -0.01em; color: var(--fg-mute); margin: 0; }
+.stage.done .title { color: var(--fg-mute); }
+.stage.current .title { color: var(--fg); }
+.stage.future .title { color: var(--fg-ghost); }
+.stage .meta { margin-top: 4px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--fg-ghost); text-transform: uppercase; }
+.stage.done .meta { color: var(--green-soft); }
+.stage.current .meta { color: var(--green); }
+.stage .desc { margin-top: 12px; font-size: 14px; color: var(--fg-mute); line-height: 1.5; max-width: 50ch; }
+.timeline { margin-top: 18px; display: flex; flex-direction: column; position: relative; max-height: 580px; overflow-y: auto; padding-right: 8px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.timeline::before { content: ""; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 1px; background: var(--line); }
+.tl-item { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+.tl-item:last-child { border-bottom: none; }
+.tl-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--line); position: relative; z-index: 1; }
+.tl-item.done .tl-dot { background: var(--green); border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+.tl-item.next .tl-dot { background: var(--bg-1); border-color: var(--green); box-shadow: 0 0 0 3px oklch(0.78 0.17 150 / 0.18), 0 0 12px var(--green-glow); animation: tl-pulse 2.2s ease-in-out infinite; }
+@keyframes tl-pulse { 0%, 100% { box-shadow: 0 0 0 3px oklch(0.78 0.17 150 / 0.18), 0 0 12px var(--green-glow); } 50% { box-shadow: 0 0 0 6px oklch(0.78 0.17 150 / 0.06), 0 0 12px var(--green-glow); } }
+.tl-body .t-when { font-family: var(--f-mono); font-size: 11px; color: var(--fg-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+.tl-item.done .t-when { color: var(--green-soft); }
+.tl-item.next .t-when { color: var(--green); }
+.tl-body .t-what { margin-top: 4px; font-size: 14px; color: var(--fg-mute); line-height: 1.45; max-width: 48ch; }
+.tl-item.done .t-what { color: var(--fg); }
+.tl-item.next .t-what { color: var(--fg); font-weight: 500; }
+.tl-item.future .t-what { color: var(--fg-dim); }
+.tl-meta { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; color: var(--fg-ghost); text-transform: uppercase; white-space: nowrap; }
+.tl-item.done .tl-meta { color: var(--green-soft); }
+.tl-item.next .tl-meta { color: var(--green); background: oklch(0.78 0.17 150 / 0.1); border: 1px solid oklch(0.78 0.17 150 / 0.3); padding: 4px 9px; border-radius: 999px; }
+.principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+.principle { padding: 22px; border-radius: var(--r); background: var(--bg-2); border: 1px solid var(--line); min-height: 152px; display: flex; flex-direction: column; gap: 14px; }
+.principle .icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; background: oklch(0.78 0.17 150 / 0.1); border: 1px solid oklch(0.78 0.17 150 / 0.22); color: var(--green); }
+.principle .icon svg { width: 16px; height: 16px; }
+.principle h4 { margin: 0; font-family: var(--f-serif); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; line-height: 1.2; color: var(--fg); }
+.principle p { margin: 0; font-size: 13.5px; color: var(--fg-mute); line-height: 1.5; }
+.protocol-trigger { display: flex; align-items: center; gap: 14px; margin-top: 20px; padding: 16px 20px; border-radius: 14px; background: oklch(0.78 0.17 150 / 0.07); border: 1px solid oklch(0.78 0.17 150 / 0.22); }
+.protocol-trigger .pt-label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--green-soft); text-transform: uppercase; }
+.protocol-trigger .pt-name { margin-left: auto; font-family: var(--f-serif); font-size: 26px; color: var(--fg); }
+.steps { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.step { display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line); }
+.step .s-num { width: 32px; height: 32px; border-radius: 9px; background: var(--bg-1); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: var(--f-mono); font-size: 12px; color: var(--green); }
+.step h5 { margin: 0; font-family: var(--f-serif); font-size: 18px; font-weight: 400; letter-spacing: -0.005em; color: var(--fg); }
+.step p { margin: 6px 0 0; font-size: 13.5px; color: var(--fg-mute); line-height: 1.5; }
+.step .s-action { margin-top: 10px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--green-soft); text-transform: uppercase; }
+.footer { display: grid; grid-template-columns: auto 1fr auto; gap: 26px; align-items: end; padding: 36px 30px 26px; border-top: 1px solid var(--line-soft); margin-top: 8px; }
+.footer .day-of { font-family: var(--f-serif); font-size: 26px; color: var(--fg); }
+.footer .day-of em { font-style: normal; color: var(--green); }
+.footer .tagline { font-family: var(--f-serif); font-style: italic; font-size: 22px; color: var(--fg-mute); text-align: center; text-wrap: balance; letter-spacing: -0.01em; }
+.footer .disclaimer { font-family: var(--f-mono); font-size: 10px; color: var(--fg-ghost); text-align: right; letter-spacing: 0.04em; max-width: 26ch; line-height: 1.6; }
+.tabnum { font-variant-numeric: tabular-nums; }
+@media (max-width: 1100px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-left { border-right: none; border-bottom: 1px solid var(--line); }
+  .lung-row, .row-3, .journey-row { grid-template-columns: 1fr; }
+  .principles { grid-template-columns: repeat(2, 1fr); }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .footer { grid-template-columns: 1fr; text-align: left; }
+  .footer .disclaimer, .footer .tagline { text-align: left; }
+}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <!-- INIT_DATA -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+  <!-- tweaks-panel -->
+  <script type="text/babel">
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;background:rgba(255,255,255,.9);
+    box-shadow:0 1px 2px rgba(0,0,0,.12);transition:left .15s,width .15s}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;background:transparent;
+    color:inherit;font:inherit;font-weight:500;min-height:22px;border-radius:6px;cursor:default;padding:4px 6px}
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-num{display:flex;align-items:center;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;text-align:right;padding:0 8px 0 0;outline:none;color:inherit}
+`;
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' ? keyOrEdits : { [keyOrEdits]: val };
+    setValues(prev => ({ ...prev, ...edits }));
+  }, []);
+  return [values, setTweak];
+}
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      if (e?.data?.type === '__activate_edit_mode') setOpen(true);
+      else if (e?.data?.type === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+  if (!open) return null;
+  return React.createElement(React.Fragment, null,
+    React.createElement('style', null, __TWEAKS_STYLE),
+    React.createElement('div', { ref: dragRef, className: 'twk-panel', style: { right: offsetRef.current.x, bottom: offsetRef.current.y } },
+      React.createElement('div', { className: 'twk-hd' },
+        React.createElement('b', null, title),
+        React.createElement('button', { className: 'twk-x', onClick: () => setOpen(false) }, '✕')
+      ),
+      React.createElement('div', { className: 'twk-body' }, children)
+    )
+  );
+}
+function TweakSection({ label, children }) {
+  return React.createElement(React.Fragment, null, React.createElement('div', { className: 'twk-sect' }, label), children);
+}
+function TweakSlider({ label, value, min=0, max=100, step=1, onChange }) {
+  return React.createElement('div', { className: 'twk-row' },
+    React.createElement('div', { className: 'twk-lbl' }, React.createElement('span', null, label), React.createElement('span', { className: 'twk-val' }, value)),
+    React.createElement('input', { type: 'range', className: 'twk-slider', min, max, step, value, onChange: e => onChange(Number(e.target.value)) })
+  );
+}
+function TweakToggle({ label, value, onChange }) {
+  return React.createElement('div', { className: 'twk-row twk-row-h' },
+    React.createElement('div', { className: 'twk-lbl' }, React.createElement('span', null, label)),
+    React.createElement('button', { type: 'button', className: 'twk-toggle', 'data-on': value ? '1' : '0', onClick: () => onChange(!value) }, React.createElement('i', null))
+  );
+}
+function TweakRadio({ label, value, options, onChange }) {
+  const opts = options.map(o => typeof o === 'object' ? o : { value: o, label: o });
+  const idx = Math.max(0, opts.findIndex(o => o.value === value));
+  const n = opts.length;
+  return React.createElement('div', { className: 'twk-row' },
+    React.createElement('div', { className: 'twk-lbl' }, React.createElement('span', null, label)),
+    React.createElement('div', { className: 'twk-seg', role: 'radiogroup' },
+      React.createElement('div', { className: 'twk-seg-thumb', style: { left: `calc(2px + ${idx} * (100% - 4px) / ${n})`, width: `calc((100% - 4px) / ${n})` } }),
+      opts.map(o => React.createElement('button', { key: o.value, type: 'button', onClick: () => onChange(o.value) }, o.label))
+    )
+  );
+}
+function TweakNumber({ label, value, min, max, step=1, onChange }) {
+  const clamp = n => Math.min(max ?? n, Math.max(min ?? n, n));
+  return React.createElement('div', { className: 'twk-num' },
+    React.createElement('span', { className: 'twk-num-lbl' }, label),
+    React.createElement('input', { type: 'number', value, min, max, step, onChange: e => onChange(clamp(Number(e.target.value))) })
+  );
+}
+Object.assign(window, { useTweaks, TweaksPanel, TweakSection, TweakSlider, TweakToggle, TweakRadio, TweakNumber });
+  </script>
+
+  <!-- lungs -->
+  <script type="text/babel">
+const { useRef: _uR, useEffect: _uE } = React;
+function LungViz({ recovery = 0.4 }) {
+  const mountRef = _uR(null);
+  const recoveryRef = _uR(recovery);
+  recoveryRef.current = recovery;
+  _uE(() => {
+    if (!window.THREE) return;
+    const mount = mountRef.current;
+    const w = mount.clientWidth, h = mount.clientHeight;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
+    camera.position.set(0, 0, 7);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    mount.appendChild(renderer.domElement);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const kl = new THREE.DirectionalLight(0x9be0b8, 1.2); kl.position.set(3, 4, 6); scene.add(kl);
+    const rl = new THREE.DirectionalLight(0x4ad8a0, 0.6); rl.position.set(-4, -2, -3); scene.add(rl);
+    const fl = new THREE.PointLight(0xa8f5d6, 0.7, 14); fl.position.set(-2, 0, 4); scene.add(fl);
+    function makeLungGeo(side) {
+      const geo = new THREE.SphereGeometry(1, 96, 96);
+      const pos = geo.attributes.position;
+      const v = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        v.fromBufferAttribute(pos, i);
+        v.y *= 1.45; v.x *= 0.9; v.z *= 0.92;
+        const tf = Math.max(0, v.y - 1.0); v.y -= tf * 0.35;
+        const inn = Math.max(0, v.x * -side); v.x -= inn * 0.55 * side;
+        const ln = Math.sin(v.y * 2.6 + side * 0.4) * 0.06 + Math.cos(v.z * 3.1 + v.y * 0.5) * 0.04;
+        v.multiplyScalar(1 + ln);
+        const n = Math.sin(v.x * 7 + v.y * 3) * 0.012 + Math.cos(v.z * 8 - v.y * 4) * 0.012;
+        v.multiplyScalar(1 + n);
+        if (v.y < -0.6) v.x *= 1.05;
+        pos.setXYZ(i, v.x, v.y, v.z);
+      }
+      geo.computeVertexNormals(); return geo;
+    }
+    const lg = new THREE.Group();
+    const lm = new THREE.MeshPhysicalMaterial({ color: new THREE.Color(0x6ad79a), roughness: 0.55, metalness: 0, transmission: 0.15, thickness: 0.8, clearcoat: 0.35, sheen: 0.5, sheenColor: new THREE.Color(0x8ff0c0), emissive: new THREE.Color(0x1f5c3a), emissiveIntensity: 0.25 });
+    const wm = new THREE.MeshBasicMaterial({ color: 0x83eab2, wireframe: true, transparent: true, opacity: 0.06 });
+    const ll = new THREE.Mesh(makeLungGeo(-1), lm); ll.position.x = -0.85; ll.scale.set(0.95, 1, 1); lg.add(ll);
+    const rl2 = new THREE.Mesh(makeLungGeo(1), lm); rl2.position.x = 0.85; lg.add(rl2);
+    const lw = new THREE.Mesh(makeLungGeo(-1), wm); lw.position.x = -0.85; lw.scale.set(0.95, 1, 1).multiplyScalar(1.005); lg.add(lw);
+    const rw = new THREE.Mesh(makeLungGeo(1), wm); rw.position.x = 0.85; rw.scale.setScalar(1.005); lg.add(rw);
+    const tm = new THREE.MeshPhysicalMaterial({ color: 0xe8f5ea, roughness: 0.6, metalness: 0.05, emissive: 0x1a3a28, emissiveIntensity: 0.2 });
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 1.2, 32), tm); tr.position.y = 1.6; lg.add(tr);
+    const bL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.13, 0.7, 24), tm); bL.position.set(-0.45, 1.1, 0); bL.rotation.z = Math.PI / 4; lg.add(bL);
+    const bR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.13, 0.7, 24), tm); bR.position.set(0.45, 1.1, 0); bR.rotation.z = -Math.PI / 4; lg.add(bR);
+    lg.scale.setScalar(1.18); lg.position.y = -0.2; scene.add(lg);
+    let raf; const t0 = performance.now();
+    const animate = () => {
+      const t = (performance.now() - t0) * 0.001;
+      lg.rotation.y = t * 0.18; lg.rotation.x = Math.sin(t * 0.25) * 0.05;
+      const br = 1 + Math.sin(t * 0.6) * 0.012;
+      ll.scale.set(0.95 * br, br, br); rl2.scale.setScalar(br);
+      const r = recoveryRef.current;
+      const tgt = new THREE.Color().lerpColors(new THREE.Color(0x4a8c70), new THREE.Color(0x86f3b6), r);
+      lm.color.lerp(tgt, 0.04); lm.emissiveIntensity = 0.18 + r * 0.25; wm.opacity = 0.04 + r * 0.06;
+      renderer.render(scene, camera); raf = requestAnimationFrame(animate);
+    };
+    animate();
+    const ro = new ResizeObserver(() => { const w2 = mount.clientWidth, h2 = mount.clientHeight; renderer.setSize(w2, h2); camera.aspect = w2 / h2; camera.updateProjectionMatrix(); });
+    ro.observe(mount);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose(); if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement); };
+  }, []);
+  return React.createElement('div', { ref: mountRef, className: 'lung-canvas' });
+}
+window.LungViz = LungViz;
+  </script>
+
+  <!-- app -->
+  <script type="text/babel">
+/* global React, ReactDOM, TweaksPanel, useTweaks, TweakSection, TweakSlider, TweakToggle, TweakRadio, TweakNumber, LungViz */
+const { useState, useEffect, useMemo, useRef } = React;
+
+const TWEAK_DEFAULTS = window.__INIT_STATE__ || {
+  streakDays: 0, cigsPerDay: 10, costPerPack: 10, cigsPerPack: 20,
+  cravingsDefeated: 0, lifetimeSmoked: 0, cravingNow: 0, reframeIndex: 0, showSparklines: true
+};
+
+const MILESTONES = [1, 3, 7, 14, 21, 30, 60, 90, 180, 365];
+const REFRAMES = [
+  { text: "The relief is not pleasure. It's just the absence of the discomfort smoking itself created.", accent: "absence", attr: "Reframe 01 · The illusion" },
+  { text: "A craving lasts three to five minutes. You are bigger than a four-minute weather system.", accent: "four-minute", attr: "Reframe 02 · The wave" },
+  { text: "You are not quitting something good. You are escaping something that was lying to you.", accent: "escaping", attr: "Reframe 03 · The trap" },
+  { text: "The version of you on day 365 is already real. You are just walking toward them.", accent: "already real", attr: "Reframe 04 · The future self" },
+];
+const ESCAPE_STAGES = [
+  { title: "See the trap", meta: "Understand the mechanism", desc: "Nicotine is a tiny monster. It creates the discomfort, then promises to relieve it. Recognise the loop." },
+  { title: "Separate identity", meta: "I am not a smoker", desc: "Decouple the habit from who you are. You are someone with nicotine receptors that no longer need to be fed." },
+  { title: "Break triggers", meta: "Rewire the cues", desc: "Coffee, stress, after-meal. Each one is a learned link. You're now actively unlearning them, one trigger at a time." },
+  { title: "Remove negotiation", meta: "Closed door", desc: "Stop arguing with yourself. The decision is already made. \"Just one\" is the most expensive sentence in your head." },
+  { title: "Celebrate freedom", meta: "Anchor the win", desc: "Mark every milestone. Tell the story. The brain remembers what you celebrate, and forgets what you don't." },
+];
+const RESTORATION = [
+  { when: "20 minutes", what: "Heart rate and blood pressure drop back to a healthy baseline." },
+  { when: "12 hours", what: "Carbon monoxide levels in your blood return to normal." },
+  { when: "3 days", what: "Nicotine is fully cleared. Withdrawal peaks — and then begins falling." },
+  { when: "2 weeks", what: "Circulation improves and lung function climbs measurably." },
+  { when: "1 month", what: "Cilia in your lungs regrow. Coughing and shortness of breath decrease." },
+  { when: "3 months", what: "Lung capacity rises up to 30%. Walking and climbing feel easier." },
+  { when: "9 months", what: "Cilia fully recovered. Lungs self-clean. Sinus and infection rate drop." },
+  { when: "1 year", what: "Risk of coronary heart disease cut roughly in half versus a smoker." },
+  { when: "5 years", what: "Risk of stroke approaches that of a never-smoker." },
+  { when: "10 years", what: "Lung cancer death risk roughly half that of someone who kept smoking." },
+  { when: "15 years", what: "Risk of coronary heart disease is the same as a never-smoker. Fully home." },
+];
+const RESTORATION_DAYS = [20/60/24, 12/24, 3, 14, 30, 90, 270, 365, 365*5, 365*10, 365*15];
+const PRINCIPLES = [
+  { icon: "M3 12c4 0 4-6 9-6s5 6 9 6", title: "The relief is not pleasure", body: "Smoking only fixes a problem smoking created. Real pleasure is what's left when the discomfort is gone for good." },
+  { icon: "M12 3v3M12 18v3M3 12h3M18 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2", title: "A craving is a wave", body: "Three to five minutes. It rises, peaks, and falls every single time. You don't need willpower — you need a timer." },
+  { icon: "M5 7h14M5 12h14M5 17h14", title: "Two monsters, one answer", body: "The physical addiction and the brainwashing. Both fade if you simply stop feeding them. Time does the work." },
+  { icon: "M4 12a8 8 0 1 0 16 0 8 8 0 1 0-16 0M9 12l2 2 4-4", title: "Willpower is the wrong tool", body: "Understanding is. You don't grit your teeth past a craving. You see it for what it is — a small lie — and let it pass." },
+  { icon: "M3 18l4-4 4 4 4-8 6 6", title: "Triggers are learned", body: "Coffee, stress, the first sip of beer. None of them require a cigarette. Your brain just thinks they do — for now." },
+  { icon: "M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z", title: "You are already free", body: "The moment you stopped, you stopped. Everything from here is the body and mind catching up to the decision you already made." },
+];
+const TRIGGER_PROTOCOL = [
+  { title: "Reframe the trigger", body: "Stress doesn't cause cravings — your brain just associated them. Notice the cue, name it out loud: \"This is stress, not a need.\"", action: "10 seconds · mental" },
+  { title: "Move the body", body: "Stand up. Twenty slow breaths, or a 60-second walk. Physical state change interrupts the autopilot to the lighter.", action: "1 minute · physical" },
+  { title: "Solve the real thing", body: "What's actually wrong? Open the task. Send the message. Drink water. The cigarette was a substitute for an action you can take instead.", action: "5 minutes · real" },
+];
+
+function fmt(n, digits=0) { return typeof n === 'number' ? n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }) : n; }
+function useCountUp(target, duration=1200) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let raf; const t0 = performance.now();
+    const tick = t => { const e = Math.min(1, (t-t0)/duration); const k = 1-Math.pow(1-e,3); setVal(target*k); if (e<1) raf=requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return val;
+}
+function nextMilestone(d) { for (const m of MILESTONES) if (d < m) return m; return MILESTONES[MILESTONES.length-1]; }
+function prevMilestone(d) { let p=0; for (const m of MILESTONES) { if (d<m) return p; p=m; } return p; }
+function nextMilestoneLabel(m) {
+  if (m<=3) return "first wall"; if (m<=7) return "first week"; if (m<=14) return "two-week mark";
+  if (m<=21) return "three-week rewire"; if (m<=30) return "first month"; if (m<=60) return "second month";
+  if (m<=90) return "quarter-year"; if (m<=180) return "half-year"; return "first year";
+}
+
+function Topbar({ today }) {
+  return (
+    <div className="topbar">
+      <div className="brand"><span className="brand-dot" /><span>Exhale &nbsp;·&nbsp; Quit Dashboard</span></div>
+      <div className="topbar-meta"><span>{today}</span><span className="live">Live · syncing</span></div>
+    </div>
+  );
+}
+
+function Sparkline({ color="var(--green)", seed=1, trend="up" }) {
+  const points = useMemo(() => {
+    const n=14, r=i=>(Math.sin(i*1.7+seed)*0.5+Math.cos(i*0.7+seed*2)*0.5), arr=[];
+    for (let i=0;i<n;i++) { const base=trend==='up'?i/(n-1):0.5; arr.push(Math.min(1,Math.max(0,base*0.7+(r(i)+1)/2*0.35+0.1))); }
+    return arr;
+  }, [seed, trend]);
+  const w=88,h=36,p=2,step=(w-p*2)/(points.length-1);
+  const path=points.map((y,i)=>`${i===0?'M':'L'} ${(p+i*step).toFixed(1)} ${(h-p-y*(h-p*2)).toFixed(1)}`).join(' ');
+  return (
+    <svg className="spark" viewBox={`0 0 ${w} ${h}`}>
+      <defs><linearGradient id={`sp-${seed}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity="0.35"/><stop offset="100%" stopColor={color} stopOpacity="0"/></linearGradient></defs>
+      <path d={`${path} L ${w-p} ${h} L ${p} ${h} Z`} fill={`url(#sp-${seed})`}/>
+      <path d={path} fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function Hero({ days, cigsPerDay, costPerPack, cigsPerPack }) {
+  const next=nextMilestone(days), prev=prevMilestone(days);
+  const progress=Math.min(1,Math.max(0,(days-prev)/(next-prev)));
+  const animDays=useCountUp(days,1400);
+  const milestonesDone = MILESTONES.filter(m=>days>=m);
+  return (
+    <section className="card elev hero">
+      <div className="hero-left">
+        <div className="hero-eyebrow"><span className="eyebrow"><span className="tick"/>Smoke-free streak</span></div>
+        <div className="streak-num tabnum"><span>{Math.floor(animDays)}</span><span className="unit">days</span></div>
+        <p className="streak-sub">You've been free for {days} day{days===1?'':'s'} — that's {fmt(days*24)} hours your body has spent rebuilding without interruption. Keep going.</p>
+        <div className="badges">
+          {milestonesDone.slice(-4).map(m=><span key={m} className="badge"><span className="b-dot"/>Day {m} · earned</span>)}
+          {days<MILESTONES[MILESTONES.length-1]&&<span className="badge dim"><span className="b-dot"/>Day {next} · in progress</span>}
+        </div>
+      </div>
+      <div className="hero-right">
+        <div className="next">Next milestone</div>
+        <h3>Day {next} · the {nextMilestoneLabel(next)}</h3>
+        <p style={{color:'var(--fg-mute)',fontSize:14,lineHeight:1.5,margin:'8px 0 0',maxWidth:'34ch'}}>{next-days} day{next-days===1?'':'s'} to go. When you hit it, expect a noticeable shift in how your body feels.</p>
+        <div className="milestone-bar"><div className="milestone-bar-fill" style={{width:`${progress*100}%`}}/></div>
+        <div className="milestone-ticks">
+          {MILESTONES.slice(0,7).map(m=>{const s=days>=m?'done':(m===next?'active':'');return <span key={m} className={s}>{s==='done'?'✓ ':''}{m}d</span>;})}
+        </div>
+        <div style={{marginTop:'auto',paddingTop:30}}>
+          <div className="eyebrow" style={{marginBottom:10}}><span className="tick"/>Today's compounding</div>
+          <div style={{display:'flex',gap:28,fontFamily:'var(--f-serif)',fontSize:30,color:'var(--fg)',letterSpacing:'-0.01em'}}>
+            <div>
+              <div style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--fg-dim)',letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:4}}>Today saved</div>
+              ${fmt(((cigsPerDay/cigsPerPack)*costPerPack),2)}
+            </div>
+            <div>
+              <div style={{fontFamily:'var(--f-mono)',fontSize:10,color:'var(--fg-dim)',letterSpacing:'0.14em',textTransform:'uppercase',marginBottom:4}}>Today avoided</div>
+              {cigsPerDay} cigs
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function KeyStats({ days, cigsPerDay, costPerPack, cigsPerPack, cravingsDefeated, lifetimeSmoked, showSparklines }) {
+  const cigsAvoided=days*cigsPerDay, money=(cigsAvoided/cigsPerPack)*costPerPack;
+  const aC=useCountUp(cigsAvoided), aM=useCountUp(money), aCr=useCountUp(cravingsDefeated);
+  return (
+    <section className="stats">
+      <div className="card stat green">
+        <span className="label">Cigarettes avoided</span>
+        <div className="v tabnum">{fmt(Math.floor(aC))}<span className="post">sticks</span></div>
+        <div className="delta"><span>↑</span> +{cigsPerDay}/day · streak compounds</div>
+        {showSparklines&&<Sparkline color="var(--green)" seed={1}/>}
+      </div>
+      <div className="card stat gold">
+        <span className="label">Money saved</span>
+        <div className="v tabnum"><span className="pre">$</span>{fmt(aM,0)}</div>
+        <div className="delta" style={{color:'var(--gold-soft)'}}><span>↑</span> +${fmt((cigsPerDay/cigsPerPack)*costPerPack,2)}/day</div>
+        {showSparklines&&<Sparkline color="var(--gold)" seed={2}/>}
+      </div>
+      <div className="card stat teal">
+        <span className="label">Cravings defeated</span>
+        <div className="v tabnum">{fmt(Math.floor(aCr))}</div>
+        <div className="delta" style={{color:'var(--teal-soft)'}}><span>↑</span> Each one rewires the loop</div>
+        {showSparklines&&<Sparkline color="var(--teal)" seed={3}/>}
+      </div>
+      <div className="card stat context">
+        <span className="label">Lifetime context</span>
+        <div className="v tabnum">{fmt(lifetimeSmoked)}<span className="post">cigs · est.</span></div>
+        <div className="delta">A history, not a verdict — your body is already undoing it.</div>
+      </div>
+    </section>
+  );
+}
+
+function LungRecovery({ days }) {
+  const recovery=useMemo(()=>1-Math.pow(0.5,days/90),[days]);
+  const animR=useCountUp(recovery*100,1500);
+  return (
+    <section className="card lung-card">
+      {window.LungViz?<LungViz recovery={recovery}/>:<div className="lung-canvas"/>}
+      <div className="lung-overlay">
+        <div className="top">
+          <div>
+            <span className="eyebrow"><span className="tick"/>Lung recovery</span>
+            <h2 style={{fontFamily:'var(--f-serif)',fontWeight:400,fontSize:32,margin:'10px 0 0',maxWidth:'16ch',letterSpacing:'-0.015em',lineHeight:1.15}}>
+              A comeback story, <span style={{color:'var(--green)'}}>in progress</span>.
+            </h2>
+          </div>
+          <div className="recovery-pill">
+            <span className="label">Recovery</span>
+            <span className="v tabnum">{animR.toFixed(1)}<span className="pct">%</span></span>
+          </div>
+        </div>
+        <div className="bottom">
+          <div className="attribution">Realistic Human Lungs · neshallads · CC Attribution.</div>
+          <div className="recovery-track">
+            <div className="rt-label"><span>0%</span><span>Climbing</span></div>
+            <div className="rt-bar"><div className="rt-fill" style={{width:`${recovery*100}%`}}/></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Activity({ days, cigsPerDay }) {
+  const actData=window.__ACTIVITY_DATA__;
+  const dayList=actData||Array.from({length:7},(_,i)=>{
+    const d=new Date(); d.setDate(d.getDate()-(6-i));
+    return { dayNum:d.getDate(), dayName:d.toLocaleDateString('en-US',{weekday:'short'}), state:'clean', isToday:i===6 };
+  });
+  const hoursReclaimed=(days*cigsPerDay*11)/60;
+  const animH=useCountUp(hoursReclaimed,1400);
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Last 7 days</span>
+      <h3 className="section-title">A week at a glance.</h3>
+      <div className="activity-days">
+        {dayList.map((d,i)=>(
+          <div key={i} className={`day ${d.state}${d.isToday?' today':''}`}>
+            <span className="d-name">{d.isToday?'Today':d.dayName}</span>
+            <span className="d-num">{d.dayNum}</span>
+            <span className="d-tag">{d.state==='clean'?'Clean':d.state==='craving'?'Held':'Slip'}</span>
+            <div className="d-mark"/>
+          </div>
+        ))}
+      </div>
+      <div className="activity-delight">
+        <span className="ad-num tabnum">{fmt(animH,1)} hrs</span>
+        <span className="ad-text">of lifetime reclaimed, conservatively, since you began.</span>
+      </div>
+    </section>
+  );
+}
+
+function TodayPulse() {
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Today's pulse</span>
+      <h3 className="section-title">Day going well.</h3>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginTop:22}}>
+        {[['Energy','High','var(--green)'],['Mood','Steady','var(--green)'],['Breath ease','↑ 8%','var(--green)'],['Cigs avoided','Today','var(--teal)']].map(([l,v,c])=>(
+          <div key={l} style={{padding:'14px',border:'1px solid var(--line)',borderRadius:12,background:'var(--bg-2)'}}>
+            <div style={{fontFamily:'var(--f-mono)',fontSize:10,letterSpacing:'0.14em',color:'var(--fg-dim)',textTransform:'uppercase'}}>{l}</div>
+            <div style={{marginTop:8,fontFamily:'var(--f-serif)',fontSize:24,color:c}}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:22,paddingTop:18,borderTop:'1px solid var(--line-soft)',fontFamily:'var(--f-serif)',fontSize:18,lineHeight:1.45,color:'var(--fg-mute)',fontStyle:'italic'}}>
+        "Notice how steady you feel. That's the baseline you forgot you had."
+      </div>
+    </section>
+  );
+}
+
+function CravingNow({ value }) {
+  const status=value<3?'Calm':value<6?'Rising':'Intense';
+  const color=value<3?'var(--green)':value<6?'var(--gold)':'var(--warn)';
+  const reassure=value<3?'Your nervous system is settling. This is what regulated feels like.':value<6?'A wave is forming. Name it. Breathe slow — it will pass before the kettle boils.':'This passes in three to five minutes. You have done this before. You have got this.';
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Right now</span>
+      <h3 className="section-title">Craving intensity</h3>
+      <div className="craving-num">
+        <span className="v tabnum" style={{color}}>{value}</span>
+        <span className="ten">/ 10</span>
+      </div>
+      <div className="craving-meter">
+        <div className="cm-fill" style={{width:'100%'}}/>
+        <div className="cm-mask" style={{width:`${100-value*10}%`}}/>
+      </div>
+      <div className="craving-status" style={{color}}>Status · {status}</div>
+      <div className="craving-reassure">"{reassure}"</div>
+    </section>
+  );
+}
+
+function Triggers() {
+  const triggers=[
+    {name:'Stress',count:24,pct:1.0},{name:'After coffee',count:17,pct:0.7},
+    {name:'After meals',count:12,pct:0.5},{name:'Deep work',count:9,pct:0.38},{name:'Social',count:6,pct:0.25},
+  ];
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Top triggers</span>
+      <h3 className="section-title">What pulls hardest.</h3>
+      <div className="trigger-list">
+        {triggers.map((t,i)=>(
+          <div key={t.name} className={`trigger${i===0?' top':''}`}>
+            <span className="rank">{String(i+1).padStart(2,'0')}</span>
+            <span className="name">{t.name}</span>
+            <span className="count">{t.count}×</span>
+            <div className="bar"><i style={{width:`${t.pct*100}%`}}/></div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Reframe({ index }) {
+  const r=REFRAMES[index%REFRAMES.length];
+  const parts=r.text.split(r.accent);
+  return (
+    <section className="card reframe">
+      <span className="reframe-eyebrow">Today's reframe</span>
+      <div className="reframe-q">{parts[0]}<span className="accent">{r.accent}</span>{parts[1]}</div>
+      <span className="reframe-attr">{r.attr}</span>
+    </section>
+  );
+}
+
+function EscapeStages({ stage=2 }) {
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Your escape · stage {stage+1} of 5</span>
+      <h3 className="section-title">The path out of the trap.</h3>
+      <div className="stage-list">
+        {ESCAPE_STAGES.map((s,i)=>{
+          const st=i<stage?'done':i===stage?'current':'future';
+          return (
+            <div key={s.title} className={`stage ${st}`}>
+              <div className="marker">{st==='done'?'✓':String(i+1).padStart(2,'0')}</div>
+              <div>
+                <div className="meta">{st==='current'?'You are here':st==='done'?'Cleared':s.meta}</div>
+                <h4 className="title">{s.title}</h4>
+                {st==='current'&&<p className="desc">{s.desc}</p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function RestorationTimeline({ days }) {
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Lung restoration timeline</span>
+      <h3 className="section-title">The long road home.</h3>
+      <div className="timeline">
+        {RESTORATION.map((r,i)=>{
+          const req=RESTORATION_DAYS[i];
+          const state=days>=req?'done':(days<req&&(i===0||days>=RESTORATION_DAYS[i-1]))?'next':'future';
+          const rem=Math.max(0,req-days);
+          let remStr=state==='done'?'Earned':state==='next'?(rem<1?`${Math.round(rem*24)}h left`:`${Math.ceil(rem)}d left`):'—';
+          return (
+            <div key={r.when} className={`tl-item ${state}`}>
+              <div className="tl-dot"/>
+              <div className="tl-body"><div className="t-when">{r.when}</div><div className="t-what">{r.what}</div></div>
+              <div className="tl-meta">{remStr}</div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function Principles() {
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>The principles</span>
+      <h3 className="section-title">Six things to keep close.</h3>
+      <div className="principles">
+        {PRINCIPLES.map(p=>(
+          <div className="principle" key={p.title}>
+            <div className="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={p.icon}/></svg></div>
+            <h4>{p.title}</h4>
+            <p>{p.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TriggerProtocol() {
+  return (
+    <section className="card">
+      <span className="eyebrow"><span className="tick"/>Trigger protocol · live</span>
+      <h3 className="section-title">When stress hits, do this.</h3>
+      <div className="protocol-trigger">
+        <span className="pt-label">For your top trigger</span>
+        <span className="pt-name">Stress</span>
+      </div>
+      <div className="steps">
+        {TRIGGER_PROTOCOL.map((s,i)=>(
+          <div className="step" key={s.title}>
+            <div className="s-num">{i+1}</div>
+            <div><h5>{s.title}</h5><p>{s.body}</p><div className="s-action">{s.action}</div></div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Footer({ days }) {
+  return (
+    <footer className="footer">
+      <div className="day-of">Day <em>{days}</em> of being free.</div>
+      <div className="tagline">"You are not quitting smoking. You are escaping a trap."</div>
+      <div className="disclaimer">For accountability and motivation. Inspired by general quit-smoking principles. Not medical advice.</div>
+    </footer>
+  );
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const today = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const escapeStage = t.streakDays<3?0:t.streakDays<14?1:t.streakDays<60?2:t.streakDays<180?3:4;
+  return (
+    <>
+      <div className="app">
+        <Topbar today={today}/>
+        <Hero days={t.streakDays} cigsPerDay={t.cigsPerDay} costPerPack={t.costPerPack} cigsPerPack={t.cigsPerPack}/>
+        <KeyStats days={t.streakDays} cigsPerDay={t.cigsPerDay} costPerPack={t.costPerPack} cigsPerPack={t.cigsPerPack} cravingsDefeated={t.cravingsDefeated} lifetimeSmoked={t.lifetimeSmoked} showSparklines={t.showSparklines}/>
+        <div className="lung-row">
+          <LungRecovery days={t.streakDays}/>
+          <Activity days={t.streakDays} cigsPerDay={t.cigsPerDay}/>
+        </div>
+        <div className="row-3">
+          <TodayPulse/>
+          <CravingNow value={t.cravingNow}/>
+          <Triggers/>
+        </div>
+        <Reframe index={t.reframeIndex}/>
+        <div className="journey-row">
+          <EscapeStages stage={escapeStage}/>
+          <RestorationTimeline days={t.streakDays}/>
+        </div>
+        <Principles/>
+        <TriggerProtocol/>
+        <Footer days={t.streakDays}/>
+      </div>
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Your streak">
+          <TweakSlider label="Smoke-free days" value={t.streakDays} min={0} max={400} step={1} onChange={v=>setTweak('streakDays',v)}/>
+          <TweakNumber label="Cigarettes / day" value={t.cigsPerDay} min={1} max={60} onChange={v=>setTweak('cigsPerDay',v)}/>
+          <TweakNumber label="Cost / pack ($)" value={t.costPerPack} min={1} max={40} step={0.5} onChange={v=>setTweak('costPerPack',v)}/>
+        </TweakSection>
+        <TweakSection label="Today">
+          <TweakSlider label="Current craving (0–10)" value={t.cravingNow} min={0} max={10} step={1} onChange={v=>setTweak('cravingNow',v)}/>
+          <TweakNumber label="Cravings defeated" value={t.cravingsDefeated} min={0} max={500} onChange={v=>setTweak('cravingsDefeated',v)}/>
+        </TweakSection>
+        <TweakSection label="Display">
+          <TweakRadio label="Today's reframe" value={t.reframeIndex} options={REFRAMES.map((_,i)=>({value:i,label:`0${i+1}`}))} onChange={v=>setTweak('reframeIndex',v)}/>
+          <TweakToggle label="Show sparklines" value={t.showSparklines} onChange={v=>setTweak('showSparklines',v)}/>
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>"""
+
+
 def dashboard_html(state):
     APP_DIR.mkdir(exist_ok=True)
     profile = state.get("profile", {})
     avoided = int(state.get("total_cigarettes_avoided", 0))
-    saved = avoided * float(state.get("price_per_cigarette", 0.5))
     streak = int(state.get("streak_days", 0))
     cravings = int(state.get("total_cravings_defeated", 0))
-    smoked = int(state.get("total_smoked_logged", 0))
     per_day = safe_int(profile.get("cigarettes_per_day", 10), 10)
-    last_smoked_count = int(state.get("last_smoked_count", 0))
-    lifetime = int(state.get("lifetime_cigarettes_estimate", calc_lifetime(profile)))
-    trigger = state.get("last_trigger") or profile.get("main_trigger", "coding")
+    price_per_cig = float(state.get("price_per_cigarette", 0.5))
     craving = int(state.get("last_craving_level", 0))
+    lifetime = int(state.get("lifetime_cigarettes_estimate", calc_lifetime(profile)))
     stage = get_current_stage(state)
     state["current_stage"] = stage
     save_state(state)
 
-    # Lung darkness computation
-    lifetime_dark_boost = min(25, lifetime / 1000)
-    recovery = streak * 3 + cravings * 1.5
-    relapse = smoked * 4 + last_smoked_count * 7 + craving * 2
-    darkness = int(max(8, min(97, 65 + lifetime_dark_boost + relapse - recovery)))
-    pinkness = 100 - darkness
-    lung_r = int(35 + (220 * pinkness / 100))
-    lung_g = int(20 + (80 * pinkness / 100))
-    lung_b = int(20 + (105 * pinkness / 100))
-    model_brightness = max(0.42, 1 - (darkness / 160))
-    model_saturation = max(0.45, 1.15 - (darkness / 180))
-    model_contrast = min(1.55, 1 + (darkness / 180))
-    model_overlay_opacity = min(0.58, darkness / 150)
-    soot_count = max(2, min(14, last_smoked_count + smoked))
-    soot_marks = ""
-    for index in range(soot_count):
-        left = 9 + ((index * 23) % 82)
-        top = 14 + ((index * 31) % 66)
-        size = 10 + ((index * 7) % 22)
-        opacity = min(0.36, 0.12 + darkness / 360)
-        soot_marks += f'<span class="soot" style="left:{left}%; top:{top}%; width:{size}px; height:{size}px; opacity:{opacity};"></span>'
-
-    model_src = lung_model_data_uri()
-    model_src_json = json.dumps(model_src)
-    model_darkness_ratio = round(darkness / 100, 3)
-
-    # Daily reframe — rotates by day
-    reframe_index = date.today().toordinal() % len(DAILY_REFRAMES)
-    todays_reframe = DAILY_REFRAMES[reframe_index]
-    reframe_num = reframe_index + 1
-
-    # Allen Carr stage content
-    carr_stage = ALLEN_CARR_STAGES[stage - 1]
-
-    # Trigger solutions
-    trigger_tips_html = solution_cards_html(trigger)
-
-    # Event log for analytics
     events = []
     if LOG_FILE.exists():
         for line in LOG_FILE.read_text().splitlines()[-200:]:
@@ -430,914 +1274,55 @@ def dashboard_html(state):
             except Exception:
                 pass
 
-    today = date.today()
-    day_rows = []
-    max_daily = 1
+    today_date = date.today()
+    activity_days = []
     for offset in range(6, -1, -1):
-        current = today - timedelta(days=offset)
-        key = current.isoformat()
-        clean_events = sum(1 for e in events if e.get("ts", "").startswith(key) and e.get("type") == "clean_checkin")
-        craving_events = sum(1 for e in events if e.get("ts", "").startswith(key) and e.get("type") in ("strong_craving", "micro_actions_completed"))
-        smoke_events = sum(max(1, int(e.get("count", 1))) for e in events if e.get("ts", "").startswith(key) and e.get("type") == "smoked_today")
-        value = clean_events + craving_events + smoke_events
-        max_daily = max(max_daily, value)
-        day_rows.append((current.strftime("%a"), clean_events, craving_events, smoke_events, value))
-
-    trigger_counts = {}
-    for event in events:
-        event_trigger = event.get("trigger") or event.get("reason") or ""
-        normalized = event_trigger.lower().strip()
-        if normalized in TRIGGER_SOLUTIONS:
-            trigger_counts[normalized] = trigger_counts.get(normalized, 0) + 1
-    if not trigger_counts:
-        trigger_counts[(trigger or "coding").lower()] = max(1, craving)
-
-    trigger_bars = ""
-    max_trigger = max(trigger_counts.values() or [1])
-    for name, count in sorted(trigger_counts.items(), key=lambda item: item[1], reverse=True)[:5]:
-        width = max(8, int((count / max_trigger) * 100))
-        trigger_bars += f"""
-        <div class="bar-row">
-          <div class="bar-label">{name.title()}</div>
-          <div class="bar-track"><span style="width:{width}%"></span></div>
-          <div class="bar-value">{count}</div>
-        </div>"""
-
-    daily_bars = ""
-    for label, clean_events, craving_events, smoke_events, value in day_rows:
-        height = 18 + int((value / max_daily) * 70)
-        clean_height = max(3, int(height * max(clean_events, 0) / max(value, 1)))
-        craving_height = max(0, int(height * max(craving_events, 0) / max(value, 1)))
-        smoke_height = max(0, height - clean_height - craving_height)
-        daily_bars += f"""
-        <div class="day-col">
-          <div class="day-stack" style="height:{height}px">
-            <span class="ds-clean" style="height:{clean_height}px"></span>
-            <span class="ds-crave" style="height:{craving_height}px"></span>
-            <span class="ds-smoke" style="height:{smoke_height}px"></span>
-          </div>
-          <div class="day-lbl">{label}</div>
-        </div>"""
-
-    # KPI data
-    next_milestone = 3 if streak < 3 else 7 if streak < 7 else 21 if streak < 21 else 30
-    milestone_progress = int(max(0, min(100, (streak / next_milestone) * 100)))
-    craving_status = "Calm" if craving <= 3 else "Watch" if craving <= 6 else "Lockdown"
-    today_avoided = max(0, per_day - last_smoked_count)
-
-    # Stages HTML — compact numbered stepper
-    stages_html = ""
-    for i, s in enumerate(ALLEN_CARR_STAGES, start=1):
-        is_active = i == stage
-        is_done = i < stage
-        state_class = "stage-active" if is_active else ("stage-done" if is_done else "stage-locked")
-        num_display = "✓" if is_done else str(i)
-        body_block = (
-            f"<div class='sbody'>{s['body']}<br><br><em>{s['key']}</em></div>"
-            if is_active else ""
+        d = today_date - timedelta(days=offset)
+        key = d.isoformat()
+        has_smoke = any(
+            e.get("ts", "").startswith(key) and e.get("type") == "smoked_today"
+            for e in events
         )
-        stages_html += f"""
-        <div class="stage-item {state_class}">
-          <div class="sline"></div>
-          <div class="snum">{num_display}</div>
-          <div class="stage-body">
-            <div class="stitle">{s["title"]}</div>
-            <div class="ssub">{s["subtitle"]}</div>
-            {body_block}
-          </div>
-        </div>"""
+        has_craving = any(
+            e.get("ts", "").startswith(key)
+            and e.get("type") in ("strong_craving", "micro_actions_completed")
+            for e in events
+        )
+        has_clean = any(
+            e.get("ts", "").startswith(key) and e.get("type") == "clean_checkin"
+            for e in events
+        )
+        day_state = (
+            "smoke"
+            if has_smoke
+            else ("craving" if has_craving and not has_clean else "clean")
+        )
+        activity_days.append(
+            {
+                "dayNum": d.day,
+                "dayName": d.strftime("%a"),
+                "state": day_state,
+                "isToday": offset == 0,
+            }
+        )
 
-    time_saved_hrs = round((avoided * 7) / 60, 1)
-    urgency_msg = (
-        "The craving peaks in 3 minutes. Wait it out." if craving >= 7
-        else "High craving — move your body for 60 seconds." if craving >= 5
-        else "Craving is low. Keep the momentum."
+    reframe_index = today_date.toordinal() % 4
+    init_state = {
+        "streakDays": streak,
+        "cigsPerDay": per_day,
+        "costPerPack": round(price_per_cig * 20, 2),
+        "cigsPerPack": 20,
+        "cravingsDefeated": cravings,
+        "lifetimeSmoked": lifetime,
+        "cravingNow": craving,
+        "reframeIndex": reframe_index,
+        "showSparklines": True,
+    }
+    init_script = (
+        f"<script>window.__INIT_STATE__={json.dumps(init_state)};"
+        f"window.__ACTIVITY_DATA__={json.dumps(activity_days)};</script>"
     )
-
-    # Lung restoration timeline HTML
-    lung_milestones_html = ""
-    next_found = False
-    for days_needed, label, desc in LUNG_MILESTONES:
-        if streak >= days_needed:
-            cls = "lm-done"
-            badge = "✓"
-            days_info = label
-        elif not next_found:
-            cls = "lm-next"
-            next_found = True
-            badge = "→"
-            days_remaining = max(1, int(days_needed - streak) + 1)
-            days_info = f"{days_remaining} day{'s' if days_remaining != 1 else ''} left"
-        else:
-            cls = "lm-future"
-            badge = "·"
-            days_info = f"day {int(days_needed)}"
-        lung_milestones_html += f"""
-        <div class="lm-item {cls}">
-          <div class="lm-badge">{badge}</div>
-          <div class="lm-body">
-            <span class="lm-label">{label}</span>
-            <span class="lm-desc">{desc}</span>
-          </div>
-          <div class="lm-days">{days_info}</div>
-        </div>"""
-
-    # Allen Carr tips HTML
-    tips_html = ""
-    for tip in ALLEN_CARR_BOOK_TIPS:
-        tips_html += f"""
-        <div class="tip-card">
-          <div class="tip-icon">{tip["icon"]}</div>
-          <div class="tip-title">{tip["title"]}</div>
-          <div class="tip-body">{tip["body"]}</div>
-        </div>"""
-
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quit Smoking — Day {streak}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,300;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after {{ box-sizing: border-box; margin: 0; padding: 0; }}
-
-:root {{
-  --bg:      #090909;
-  --card:    #111111;
-  --card2:   #161616;
-  --border:  #1e1e1e;
-  --border2: #2a2a2a;
-  --text:    #efefef;
-  --muted:   #5a5a5a;
-  --dim:     #3a3a3a;
-  --green:   #4ade80;
-  --green2:  #22c55e;
-  --red:     #f87171;
-  --gold:    #c9a96e;
-  --blue:    #60a5fa;
-  --purple:  #a78bfa;
-}}
-
-body {{
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  min-height: 100vh;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}}
-
-a {{ color: inherit; text-decoration: none; }}
-
-/* ─── LAYOUT ─── */
-.page {{ max-width: 1280px; margin: 0 auto; padding: 0 28px 80px; }}
-
-/* top nav */
-.topnav {{
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px;
-}}
-.topnav-brand {{ font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }}
-.topnav-pills {{ display: flex; gap: 8px; align-items: center; }}
-.pill {{
-  border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600;
-  border: 1px solid var(--border); background: var(--card); color: var(--muted);
-}}
-.pill.green {{ background: rgba(74,222,128,.1); border-color: rgba(74,222,128,.25); color: var(--green); }}
-.pill.gold  {{ background: rgba(201,169,110,.1); border-color: rgba(201,169,110,.25); color: var(--gold); }}
-
-/* main two-col grid */
-.main-grid {{
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 20px;
-}}
-
-/* ─── LEFT COLUMN ─── */
-.left-col {{ display: flex; flex-direction: column; gap: 16px; }}
-
-/* hero */
-.hero {{
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 36px 32px 32px;
-  position: relative;
-  overflow: hidden;
-}}
-.hero::after {{
-  content: '';
-  position: absolute;
-  top: -60px; left: -60px;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(74,222,128,.07) 0%, transparent 65%);
-  pointer-events: none;
-}}
-.hero-kicker {{
-  font-size: 11px; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
-}}
-.hero-row {{ display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; }}
-.hero-num {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-weight: 700;
-  font-size: clamp(72px, 10vw, 110px);
-  line-height: 1; color: var(--text);
-  animation: glow 3s ease-in-out infinite;
-}}
-@keyframes glow {{
-  0%, 100% {{ text-shadow: 0 0 40px rgba(74,222,128,0); }}
-  50% {{ text-shadow: 0 0 40px rgba(74,222,128,.18); }}
-}}
-.hero-meta {{ padding-bottom: 8px; }}
-.hero-unit {{ font-size: 22px; color: var(--muted); font-weight: 400; }}
-.hero-tagline {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-size: 15px;
-  color: var(--green); opacity: .8; margin-top: 4px;
-}}
-.milestone-bar-wrap {{ margin-top: 20px; }}
-.milestone-labels {{
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: var(--muted); margin-bottom: 6px;
-}}
-.milestone-bar {{
-  height: 4px; background: var(--border); border-radius: 999px; overflow: hidden;
-}}
-.milestone-fill {{
-  height: 100%; width: {milestone_progress}%;
-  background: linear-gradient(90deg, var(--green2), var(--green));
-  border-radius: inherit; transition: width 1s ease;
-}}
-
-/* KPI grid 2×2 */
-.kpi-grid {{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}}
-.kpi {{
-  border-radius: 14px; padding: 20px 22px;
-  transition: transform .18s, box-shadow .18s;
-  cursor: default; position: relative; overflow: hidden;
-}}
-.kpi::after {{
-  content: '';
-  position: absolute; top: -40px; right: -40px;
-  width: 120px; height: 120px; border-radius: 50%;
-  opacity: .06; pointer-events: none;
-}}
-.kpi:hover {{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }}
-.kpi.kpi-green {{ background: rgba(74,222,128,.06); border: 1px solid rgba(74,222,128,.14); }}
-.kpi.kpi-green::after {{ background: var(--green); opacity: .1; }}
-.kpi.kpi-gold  {{ background: rgba(201,169,110,.06); border: 1px solid rgba(201,169,110,.14); }}
-.kpi.kpi-gold::after  {{ background: var(--gold); opacity: .1; }}
-.kpi.kpi-blue  {{ background: rgba(96,165,250,.06); border: 1px solid rgba(96,165,250,.14); }}
-.kpi.kpi-blue::after  {{ background: var(--blue); opacity: .1; }}
-.kpi.kpi-red   {{ background: rgba(248,113,113,.05); border: 1px solid rgba(248,113,113,.12); }}
-.kpi.kpi-red::after   {{ background: var(--red); opacity: .08; }}
-.kpi-icon {{ font-size: 22px; margin-bottom: 12px; }}
-.kpi-label {{
-  font-size: 11px; font-weight: 600; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
-}}
-.kpi-num {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-weight: 700; font-size: 38px; line-height: 1;
-}}
-.kpi-green .kpi-num {{ color: var(--green); }}
-.kpi-gold  .kpi-num {{ color: var(--gold); }}
-.kpi-blue  .kpi-num {{ color: var(--blue); }}
-.kpi-red   .kpi-num {{ color: var(--red); }}
-.kpi-sub {{ font-size: 12px; color: var(--muted); margin-top: 8px; }}
-
-/* analytics panel */
-.analytics {{
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 24px;
-}}
-.panel-head {{
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 16px;
-}}
-.panel-title {{
-  font-size: 12px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted);
-}}
-.analytics-inner {{
-  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
-}}
-
-/* trigger bars */
-.bar-row {{
-  display: grid; grid-template-columns: 72px 1fr 28px;
-  gap: 8px; align-items: center; margin-bottom: 9px;
-}}
-.bar-label {{ font-size: 12px; color: var(--muted); }}
-.bar-value {{ font-size: 12px; color: var(--muted); text-align: right; }}
-.bar-track {{ height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }}
-.bar-track span {{
-  display: block; height: 100%;
-  background: linear-gradient(90deg, var(--green2), var(--green));
-  border-radius: inherit;
-}}
-
-/* ── LUNG RESTORATION TIMELINE ── */
-.lm-item {{
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-}}
-.lm-item:last-child {{ border-bottom: none; }}
-.lm-badge {{
-  width: 22px; height: 22px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
-  background: var(--border2); color: var(--muted);
-}}
-.lm-done .lm-badge {{ background: rgba(74,222,128,.15); color: var(--green); }}
-.lm-next .lm-badge {{
-  background: var(--green); color: #000;
-  box-shadow: 0 0 12px rgba(74,222,128,.4);
-  animation: lm-pulse 2s ease-in-out infinite;
-}}
-@keyframes lm-pulse {{
-  0%,100% {{ box-shadow: 0 0 10px rgba(74,222,128,.3); }}
-  50% {{ box-shadow: 0 0 22px rgba(74,222,128,.6); }}
-}}
-.lm-body {{ flex: 1; min-width: 0; }}
-.lm-label {{
-  font-size: 13px; font-weight: 600;
-  color: var(--text); display: block;
-}}
-.lm-done .lm-label {{ color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(74,222,128,.4); }}
-.lm-next .lm-label {{ color: var(--green); }}
-.lm-future .lm-label {{ color: var(--muted); }}
-.lm-desc {{
-  font-size: 12px; color: var(--muted);
-  display: block; margin-top: 2px; line-height: 1.4;
-}}
-.lm-next .lm-desc {{ color: #888; }}
-.lm-days {{
-  font-size: 11px; font-weight: 600; flex-shrink: 0;
-  color: var(--muted); white-space: nowrap;
-  padding-top: 3px;
-}}
-.lm-done .lm-days {{ color: rgba(74,222,128,.5); }}
-.lm-next .lm-days {{
-  color: var(--green); font-size: 12px;
-  background: rgba(74,222,128,.08);
-  border: 1px solid rgba(74,222,128,.2);
-  border-radius: 999px; padding: 2px 8px;
-}}
-
-/* ── STAGE STEPPER ── */
-.stage-track {{
-  display: flex; flex-direction: column; gap: 0;
-}}
-.stage-item {{
-  display: flex; gap: 16px; padding: 13px 0;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-}}
-.stage-item:last-child {{ border-bottom: none; padding-bottom: 0; }}
-.stage-item:not(:last-child) .sline {{
-  position: absolute; left: 14px; top: 28px; bottom: 0;
-  width: 2px; background: var(--border);
-}}
-.stage-item.stage-done:not(:last-child) .sline {{ background: rgba(74,222,128,.25); }}
-.stage-item.stage-active:not(:last-child) .sline {{
-  background: linear-gradient(180deg, rgba(74,222,128,.4), var(--border));
-}}
-.snum {{
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; flex-shrink: 0;
-  background: var(--border2); color: var(--muted);
-  position: relative; z-index: 1; margin-top: 2px;
-}}
-.stage-active .snum {{
-  background: var(--green); color: #000;
-  box-shadow: 0 0 0 4px rgba(74,222,128,.15);
-}}
-.stage-done .snum {{ background: rgba(74,222,128,.12); color: var(--green); font-size: 13px; }}
-.stage-body {{ flex: 1; padding: 0 0 6px; }}
-.stitle {{ font-size: 14px; font-weight: 600; line-height: 1.3; }}
-.stage-locked .stitle, .stage-locked .ssub {{ color: var(--muted); }}
-.stage-active .stitle {{ color: var(--green); }}
-.ssub {{ font-size: 11px; color: var(--muted); margin-top: 3px; }}
-.sbody {{
-  font-size: 13px; color: #888; line-height: 1.65; margin-top: 10px;
-  background: rgba(74,222,128,.04); border-left: 2px solid rgba(74,222,128,.3);
-  padding: 10px 12px; border-radius: 0 8px 8px 0;
-}}
-.sbody em {{
-  color: var(--green); font-style: italic;
-  font-family: 'Fraunces', Georgia, serif; font-size: 14px;
-}}
-
-/* ── ALLEN CARR TIPS ── */
-.tips-grid {{
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-  margin-bottom: 16px;
-}}
-.tip-card {{
-  background: var(--card); border: 1px solid var(--border2);
-  border-radius: 12px; padding: 20px;
-  transition: border-color .18s, transform .18s;
-  cursor: default;
-}}
-.tip-card:hover {{ border-color: var(--dim); transform: translateY(-1px); }}
-.tip-icon {{ font-size: 24px; margin-bottom: 12px; }}
-.tip-title {{ font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }}
-.tip-body {{ font-size: 13px; color: var(--muted); line-height: 1.6; }}
-
-/* trigger tips (inline) */
-.trigger-head {{ display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }}
-.trigger-pill {{
-  border-radius: 999px; padding: 4px 14px;
-  font-size: 12px; font-weight: 700; text-transform: capitalize;
-  background: rgba(201,169,110,.1); border: 1px solid rgba(201,169,110,.25); color: var(--gold);
-}}
-.trig-item {{
-  display: flex; gap: 10px; padding: 11px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px; color: #999; line-height: 1.5;
-}}
-.trig-item:last-child {{ border-bottom: none; }}
-.trig-check {{ color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }}
-
-/* 7-day chart */
-.daychart {{
-  display: grid; grid-template-columns: repeat(7, 1fr);
-  gap: 6px; align-items: end; height: 88px;
-}}
-.day-col {{
-  display: flex; flex-direction: column;
-  align-items: center; gap: 5px;
-  height: 100%; justify-content: flex-end;
-}}
-.day-stack {{
-  width: 100%; max-width: 26px;
-  display: flex; flex-direction: column-reverse;
-  border-radius: 4px 4px 2px 2px; overflow: hidden;
-  background: var(--border); min-height: 4px;
-}}
-.day-stack span {{ display: block; width: 100%; }}
-.ds-clean {{ background: var(--green); opacity: .75; }}
-.ds-crave {{ background: var(--blue); opacity: .75; }}
-.ds-smoke {{ background: var(--red); opacity: .75; }}
-.day-lbl {{ font-size: 10px; color: var(--muted); }}
-.legend {{
-  display: flex; gap: 14px; margin-top: 10px;
-  font-size: 11px; color: var(--muted);
-}}
-.ldot {{
-  display: inline-block; width: 6px; height: 6px;
-  border-radius: 50%; margin-right: 4px; vertical-align: middle;
-}}
-
-/* ─── RIGHT COLUMN (lungs) ─── */
-.right-col {{
-  position: sticky;
-  top: 20px;
-  display: flex; flex-direction: column; gap: 12px;
-}}
-.lungs-panel {{
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden;
-  position: relative;
-}}
-.lungs-head {{
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 16px 18px 0;
-}}
-.lungs-title {{
-  font-size: 11px; font-weight: 700; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--muted);
-}}
-.darkness-chip {{
-  font-size: 11px; font-weight: 600;
-  color: {"var(--red)" if darkness > 60 else "var(--gold)" if darkness > 30 else "var(--green)"};
-  background: {"rgba(248,113,113,.1)" if darkness > 60 else "rgba(201,169,110,.1)" if darkness > 30 else "rgba(74,222,128,.1)"};
-  border: 1px solid {"rgba(248,113,113,.2)" if darkness > 60 else "rgba(201,169,110,.2)" if darkness > 30 else "rgba(74,222,128,.2)"};
-  border-radius: 999px; padding: 3px 10px;
-}}
-.lungs-frame {{
-  position: relative; height: 460px; margin: 12px 0 0;
-  background: radial-gradient(circle at 50% 38%, #0e1a1a 0%, #080808 70%);
-}}
-#lung3d {{ position: absolute; inset: 0; }}
-.lungs-fog {{
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 42%, rgba(0,0,0,{model_overlay_opacity}), transparent 50%),
-    linear-gradient(180deg, rgba(0,0,0,{model_overlay_opacity * .45}), rgba(0,0,0,0));
-}}
-.soot {{
-  position: absolute; border-radius: 50%;
-  background: rgba(0,0,0,.65); filter: blur(3px); pointer-events: none;
-}}
-.lungs-foot {{ padding: 0 18px 16px; }}
-.recovery-label {{
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: var(--muted); margin-bottom: 6px; margin-top: 12px;
-}}
-.recovery-bar {{
-  height: 5px; background: var(--border);
-  border-radius: 999px; overflow: hidden;
-}}
-.recovery-fill {{
-  width: {pinkness}%; height: 100%;
-  background: linear-gradient(90deg, #f87171 0%, #facc15 50%, #4ade80 100%);
-  border-radius: inherit;
-}}
-.lungs-credit {{
-  font-size: 10px; color: #3a3a3a; margin-top: 8px; text-align: center;
-}}
-.lungs-credit a {{ color: #4a4a4a; }}
-
-/* right mini panels */
-.mini-panel {{
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px 18px;
-}}
-.mini-label {{
-  font-size: 11px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
-}}
-.craving-row {{ display: flex; align-items: center; gap: 10px; }}
-.craving-val {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-size: 38px; font-weight: 700;
-  color: {"var(--red)" if craving >= 7 else "var(--gold)" if craving >= 4 else "var(--green)"};
-  line-height: 1;
-}}
-.craving-meta {{ font-size: 13px; color: var(--muted); line-height: 1.45; }}
-.craving-status {{
-  font-weight: 700;
-  color: {"var(--red)" if craving >= 7 else "var(--gold)" if craving >= 4 else "var(--green)"};
-}}
-
-/* ─── FULL-WIDTH SECTIONS ─── */
-.full-row {{
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
-}}
-.section-panel {{
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 24px;
-}}
-.section-title {{
-  font-size: 11px; font-weight: 700; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 18px;
-}}
-
-/* reframe banner */
-.reframe-banner {{
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 40px;
-  text-align: center; position: relative;
-  overflow: hidden; margin-bottom: 16px;
-}}
-.reframe-banner::before {{
-  content: '';
-  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 600px; height: 200px;
-  background: radial-gradient(ellipse at center top, rgba(74,222,128,.05) 0%, transparent 70%);
-  pointer-events: none;
-}}
-.reframe-kicker {{
-  font-size: 11px; font-weight: 700; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
-}}
-.reframe-quote {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-weight: 300;
-  font-size: clamp(20px, 3vw, 30px);
-  line-height: 1.4; color: var(--text);
-  max-width: 700px; margin: 0 auto;
-}}
-.reframe-footer {{
-  margin-top: 20px; font-size: 12px; color: var(--muted);
-}}
-
-/* footer */
-.site-footer {{
-  border-top: 1px solid var(--border);
-  padding: 40px 0 0; text-align: center; margin-top: 32px;
-}}
-.footer-streak {{
-  font-family: 'Fraunces', Georgia, serif;
-  font-style: italic; font-size: 17px; color: var(--muted); margin-bottom: 6px;
-}}
-.footer-line {{ font-size: 13px; color: var(--dim); }}
-.footer-disclaimer {{
-  font-size: 11px; color: #2e2e2e; margin-top: 16px; line-height: 1.6;
-  max-width: 520px; margin-left: auto; margin-right: auto;
-}}
-
-@media (max-width: 1024px) {{
-  .main-grid {{ grid-template-columns: 1fr; }}
-  .right-col {{ position: static; }}
-  .lungs-frame {{ height: 360px; }}
-}}
-@media (max-width: 640px) {{
-  .kpi-grid, .full-row {{ grid-template-columns: 1fr; }}
-  .analytics-inner {{ grid-template-columns: 1fr; }}
-  .reframe-banner {{ padding: 28px 20px; }}
-}}
-</style>
-</head>
-<body>
-<div class="page">
-
-  <!-- TOP NAV -->
-  <nav class="topnav">
-    <span class="topnav-brand">Quit Smoking</span>
-    <div class="topnav-pills">
-      <span class="pill">{today.strftime("%b %d, %Y")}</span>
-      <span class="pill green">Stage {stage} of 5</span>
-      <span class="pill gold">🔥 Day {streak}</span>
-    </div>
-  </nav>
-
-  <!-- MAIN GRID: left analytics | right lungs -->
-  <div class="main-grid">
-
-    <!-- ── LEFT COLUMN ── -->
-    <div class="left-col">
-
-      <!-- HERO -->
-      <div class="hero">
-        <div class="hero-kicker">Smoke-free streak</div>
-        <div class="hero-row">
-          <div class="hero-num">{streak}</div>
-          <div class="hero-meta">
-            <div class="hero-unit">days free</div>
-            <div class="hero-tagline">{milestone_progress}% to day {next_milestone}</div>
-          </div>
-        </div>
-        <div class="milestone-bar-wrap">
-          <div class="milestone-labels">
-            <span>Day {streak}</span>
-            <span>Day {next_milestone} milestone</span>
-          </div>
-          <div class="milestone-bar"><div class="milestone-fill"></div></div>
-        </div>
-      </div>
-
-      <!-- KPI 2×2 -->
-      <div class="kpi-grid">
-        <div class="kpi kpi-green">
-          <div class="kpi-icon">🚭</div>
-          <div class="kpi-label">Cigarettes avoided</div>
-          <div class="kpi-num">{avoided}</div>
-          <div class="kpi-sub">{today_avoided} not smoked today</div>
-        </div>
-        <div class="kpi kpi-gold">
-          <div class="kpi-icon">💰</div>
-          <div class="kpi-label">Money saved</div>
-          <div class="kpi-num">${saved:.0f}</div>
-          <div class="kpi-sub">${state.get("price_per_cigarette", 0.5):.2f} per cigarette</div>
-        </div>
-        <div class="kpi kpi-blue">
-          <div class="kpi-icon">⚡</div>
-          <div class="kpi-label">Cravings defeated</div>
-          <div class="kpi-num">{cravings}</div>
-          <div class="kpi-sub">Each one starves the monster</div>
-        </div>
-        <div class="kpi kpi-red">
-          <div class="kpi-icon">📊</div>
-          <div class="kpi-label">Lifetime smoked (est.)</div>
-          <div class="kpi-num">{lifetime:,}</div>
-          <div class="kpi-sub">{smoked} logged since tracking</div>
-        </div>
-      </div>
-
-      <!-- ANALYTICS -->
-      <div class="analytics">
-        <div class="panel-head">
-          <span class="panel-title">Activity — last 7 days</span>
-          <span class="pill">{time_saved_hrs}h of life reclaimed</span>
-        </div>
-        <div class="analytics-inner">
-          <div>
-            <div class="daychart">{daily_bars}</div>
-            <div class="legend" style="margin-top:12px">
-              <span><span class="ldot" style="background:var(--green)"></span>Clean</span>
-              <span><span class="ldot" style="background:var(--blue)"></span>Craving</span>
-              <span><span class="ldot" style="background:var(--red)"></span>Smoke</span>
-            </div>
-          </div>
-          <div>
-            <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Top triggers</div>
-            {trigger_bars}
-          </div>
-        </div>
-      </div>
-
-    </div><!-- end left-col -->
-
-    <!-- ── RIGHT COLUMN (lungs + craving) ── -->
-    <div class="right-col">
-
-      <!-- 3D LUNGS -->
-      <div class="lungs-panel">
-        <div class="lungs-head">
-          <span class="lungs-title">Lung condition</span>
-          <span class="darkness-chip">{darkness}% dark</span>
-        </div>
-        <div class="lungs-frame">
-          <div id="lung3d"></div>
-          <div class="lungs-fog">{soot_marks}</div>
-        </div>
-        <div class="lungs-foot">
-          <div class="recovery-label">
-            <span>Damage</span>
-            <span>Recovery {pinkness}%</span>
-          </div>
-          <div class="recovery-bar"><div class="recovery-fill"></div></div>
-          <div class="lungs-credit">
-            <a href="https://sketchfab.com/3d-models/realistic-human-lungs-ce09f4099a68467880f46e61eb9a3531">Realistic Human Lungs</a> · neshallads · CC Attribution
-          </div>
-        </div>
-      </div>
-
-      <!-- CRAVING STATUS -->
-      <div class="mini-panel">
-        <div class="mini-label">Current craving</div>
-        <div class="craving-row">
-          <div class="craving-val">{craving}</div>
-          <div class="craving-meta">
-            <span class="craving-status">{craving_status}</span><br>
-            {urgency_msg}
-          </div>
-        </div>
-      </div>
-
-    </div><!-- end right-col -->
-  </div><!-- end main-grid -->
-
-  <!-- TODAY'S REFRAME (full width) -->
-  <div class="reframe-banner">
-    <div class="reframe-kicker">Today's reframe · principle {reframe_num} of {len(DAILY_REFRAMES)}</div>
-    <div class="reframe-quote">"{todays_reframe}"</div>
-    <div class="reframe-footer">Changes daily — come back tomorrow for a new one</div>
-  </div>
-
-  <!-- STAGE + LUNG RESTORATION -->
-  <div class="full-row">
-    <div class="section-panel">
-      <div class="section-title" style="margin-bottom:20px">Your escape stage</div>
-      <div class="stage-track">
-        {stages_html}
-      </div>
-    </div>
-    <div class="section-panel">
-      <div class="section-title" style="margin-bottom:4px">Lung restoration timeline</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Day {streak} — updates with each check-in</div>
-      {lung_milestones_html}
-    </div>
-  </div>
-
-  <!-- ALLEN CARR TIPS -->
-  <div style="margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding:0 2px">
-      Principles — paraphrased, not copied
-    </div>
-    <div class="tips-grid">{tips_html}</div>
-  </div>
-
-  <!-- TRIGGER PROTOCOL -->
-  <div class="full-row" style="margin-bottom:0">
-    <div class="section-panel" style="grid-column:1/-1">
-      <div class="section-title" style="margin-bottom:16px">Protocol for: {trigger.title()}</div>
-      <div class="trigger-head">
-        <span class="trigger-pill">{trigger.title()}</span>
-        <span style="font-size:12px;color:var(--muted)">Craving {craving}/10 — {craving_status}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
-        {"".join(f'<div class="trig-item" style="border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:10px;align-items:flex-start"><span class="trig-check">✓</span><span>{item}</span></div>' for item in TRIGGER_SOLUTIONS.get((trigger or "coding").lower(), TRIGGER_SOLUTIONS["coding"]))}
-      </div>
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="footer-streak">Day {streak} of being free</div>
-    <div class="footer-line">You are not quitting smoking. You are escaping a trap.</div>
-    <div class="footer-disclaimer">
-      This tool is for accountability and motivation. Inspired by general quit-smoking principles. Not medical advice.
-      If you need medical support, speak with a healthcare professional.
-    </div>
-  </footer>
-
-</div><!-- end page -->
-
-<script type="importmap">
-{{
-  "imports": {{
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }}
-}}
-</script>
-<script type="module">
-import * as THREE from "three";
-import {{ OrbitControls }} from "three/addons/controls/OrbitControls.js";
-import {{ GLTFLoader }} from "three/addons/loaders/GLTFLoader.js";
-
-const modelSrc = {model_src_json};
-const darkness = {model_darkness_ratio};
-const mount = document.getElementById("lung3d");
-
-if (modelSrc && mount) {{
-  const scene = new THREE.Scene();
-  scene.background = null;
-
-  const camera = new THREE.PerspectiveCamera(32, mount.clientWidth / mount.clientHeight, 0.01, 100);
-  camera.position.set(0, 0.04, 3.7);
-
-  const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(mount.clientWidth, mount.clientHeight);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  mount.appendChild(renderer.domElement);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.enablePan = false;
-  controls.minDistance = 1.6;
-  controls.maxDistance = 5;
-  controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.6;
-
-  scene.add(new THREE.HemisphereLight(0x111122, 0x050505, 1.8));
-  const key = new THREE.DirectionalLight(0xffffff, 2.4);
-  key.position.set(2.4, 3.2, 4);
-  scene.add(key);
-  const rim = new THREE.DirectionalLight(0x4ade80, 0.6);
-  rim.position.set(-3, 1.8, -2);
-  scene.add(rim);
-
-  const loader = new GLTFLoader();
-  loader.load(modelSrc, (gltf) => {{
-    const root = gltf.scene;
-    const box = new THREE.Box3().setFromObject(root);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-    const maxAxis = Math.max(size.x, size.y, size.z) || 1;
-    root.position.sub(center);
-    root.position.y -= 0.05;
-    root.position.x += 0.03;
-    root.scale.multiplyScalar(1.78 / maxAxis);
-
-    const tarColor = new THREE.Color(0x120f13);
-    const healthyColor = new THREE.Color(0xff8fb8);
-    const dangerColor = new THREE.Color(0x272027);
-
-    root.traverse((node) => {{
-      if (!node.isMesh) return;
-      const materials = Array.isArray(node.material) ? node.material : [node.material];
-      const nextMaterials = materials.map((mat) => {{
-        const cloned = mat.clone();
-        const base = cloned.color ? cloned.color.clone() : healthyColor.clone();
-        base.lerp(healthyColor, 0.25);
-        base.lerp(dangerColor, darkness * 0.55);
-        base.lerp(tarColor, darkness * 0.42);
-        cloned.color = base;
-        cloned.roughness = 0.82;
-        cloned.metalness = 0.02;
-        return cloned;
-      }});
-      node.material = Array.isArray(node.material) ? nextMaterials : nextMaterials[0];
-    }});
-
-    scene.add(root);
-    controls.target.set(0, 0.02, 0);
-
-    function animate() {{
-      controls.update();
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }}
-    animate();
-  }});
-
-  window.addEventListener("resize", () => {{
-    camera.aspect = mount.clientWidth / mount.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
-  }});
-}}
-</script>
-</body>
-</html>
-"""
+    html = _DASHBOARD_TEMPLATE.replace("<!-- INIT_DATA -->", init_script)
     path = APP_DIR / "dashboard.html"
     path.write_text(html)
     return path
