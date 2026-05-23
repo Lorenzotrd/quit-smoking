@@ -21,12 +21,13 @@ QUIT_ASCII = r"""
 ██║▄▄ ██║██║   ██║██║   ██║
 ╚██████╔╝╚██████╔╝██║   ██║
  ╚══▀▀═╝  ╚═════╝ ╚═╝   ╚═╝
+  ─────── S M O K I N G ───────
 
         (  )
          )(
-        (  )   cigarette
+        (  )
       -------
-  QUIT SMOKING — ESCAPE THE TRAP
+      ESCAPE THE TRAP
 """
 
 DEFAULT_STATE = {
